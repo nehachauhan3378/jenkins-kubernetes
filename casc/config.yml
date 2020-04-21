@@ -35,7 +35,7 @@ jobs:
           cpsScm { 
             scm { 
               git { 
-                remote { url('git://github.com/tizianatroukens/jenkins-kubernetes.git') } 
+                remote { url('https://github.com/nehachauhan3378/jenkins-kubernetes.git') } 
                 branches('master') 
                 scriptPath('jenkins-job-builder/Jenkinsfile')
               }
