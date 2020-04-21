@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: jjb-config
-  namespace: jenkins-project
+  namespace: jenkins-project-neha
 data:
   jenkins_jobs.ini: |
     [job_builder]
@@ -17,5 +17,5 @@ data:
     [jenkins]
     user=admin
     password=admin123
-    url=http://192.168.99.100:32000
+    url=http://10.0.212.146:32099
     query_plugins_info=False
