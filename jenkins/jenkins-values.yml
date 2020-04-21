@@ -1,49 +1,46 @@
-# Default values for jenkins.
-# This is a YAML-formatted file.
-# Declare name/value pairs to be passed into your templates.
-# name: value
-
-## Overrides for generated resource names
-# See templates/_helpers.tpl
-# nameOverride:
-# fullnameOverride:
-
-Master:
-  Name: jenkins-master
-  Image: "jenkins/jenkins"
-  ImageTag: "lts"
-  ImagePullPolicy: "Always"
-  Component: "jenkins-master"
-  UseSecurity: true
-  AdminUser: admin
-  # AdminPassword: <defaults to random>
-  Cpu: "200m"
-  Memory: "256Mi"
-  ServicePort: 8080
+master:
+  componentName: "jenkins-master"
+  image: "jenkins/jenkins"
+  tag: "lts"
+  imagePullPolicy: "Always"
+  numExecutors: 2
+  customJenkinsLabels:
+    - jenkins-job-builder
+  # configAutoReload requires UseSecurity is set to true:
+  useSecurity: true
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "256Mi"
+    limits:
+      cpu: "2000m"
+      memory: "4096Mi"
+  adminUser: "admin"
+  servicePort: 8080
+  targetPort: 8080
   # For minikube, set this to NodePort, elsewhere use LoadBalancer
-  # <to set explicitly, choose port between 30000-32767>
-  ServiceType: NodePort
-  NodePort: 32099
-  ServiceAnnotations: {}
-  ContainerPort: 8080
-  # Enable Kubernetes Liveness and Readiness Probes
-  HealthProbes: true
-  HealthProbesTimeout: 60
-  SlaveListenerPort: 50000
-  LoadBalancerSourceRanges:
+  # Use ClusterIP if your setup includes ingress controller
+  serviceType: NodePort
+  # Jenkins master service annotations
+  serviceAnnotations: {}
+  nodePort: 32099
+  healthProbes: true
+  healthProbesLivenessTimeout: 5
+  slaveListenerPort: 50000
+  # LoadBalancerSourcesRange is a list of allowed CIDR values, which are combined with ServicePort to
+  # set allowed inbound rules on the security group assigned to the master load balancer
+  loadBalancerSourceRanges:
     - 0.0.0.0/0
   # Environment Variables
   ContainerEnv:
     - name: CASC_JENKINS_CONFIG
-      value: https://raw.githubusercontent.com/nehachauhan3378/jenkins-kubernetes/master/casc/config.yml
+      value: "https://raw.githubusercontent.com/anilkps199/jenkins-kubernetes/master/casc/config.yml"
     - name: JENKINS_URL
-      value: http://10.0.212.146:32099
-
-  # List of plugins to be install during Jenkins master start
-  InstallPlugins:
+      value: "http://10.0.212.146:32099"
+  installPlugins:
     - kubernetes:1.25.1
-    - workflow-aggregator:2.6
     - workflow-job:2.36
+    - workflow-aggregator:2.6
     - credentials-binding:1.21
     - git:4.2.2
     - blueocean:1.22.0
@@ -53,55 +50,56 @@ Master:
     - configuration-as-code-support:1.18
     - role-strategy:latest
   # Used to approve a list of groovy functions in pipelines used the script-security plugin. Can be viewed under /scriptApproval
-  ScriptApproval:
+  scriptApproval:
     - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
     - "new groovy.json.JsonSlurperClassic"
     - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods leftShift java.util.Map java.util.Map"
     - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods split java.lang.String"
-  CustomConfigMap: false
-  NodeSelector: {}
-  Tolerations: {}
+  customConfigMap: false
+  nodeSelector: {}
+  tolerations: []
 
-Agent:
-  Enabled: true
-  Image: jenkins/jnlp-slave
-  ImageTag: 3.10-1
-  Component: "jenkins-slave"
-  Privileged: false
-  Cpu: "200m"
-  Memory: "256Mi"
+agent:
+  enabled: true
+  image: "jenkins/jnlp-slave"
+  tag: "3.27-1"
+  componentName: "jenkins-slave"
+  privileged: false
+  resources:
+    requests:
+      cpu: "512m"
+      memory: "512Mi"
+    limits:
+      cpu: "512m"
+      memory: "512Mi"
   # You may want to change this to true while testing a new image
-  AlwaysPullImage: false
-  PodRetention: Never
-  # You can define the volumes that you want to mount for this container
-  # Allowed types are: ConfigMap, EmptyDir, HostPath, Nfs, Pod, Secret
-  volumes:
-  #  - type: HostPath
-  #    hostPath: /var/run/docker.sock
-  #    mountPath: /var/run/docker.sock
-  NodeSelector: {}
+  alwaysPullImage: false
+  # Controls how agent pods are retained after the Jenkins build completes
+  # Possible values: Always, Never, OnFailure
+  podRetention: "Never"
+  volumes: []
+  # - type: Secret
+  #   secretName: mysecret
+  #   mountPath: /var/myapp/mysecret
+  # - type: EmptyDir
+  #   mountPath: "/var/lib/containers"
+  #   memory: false
+  nodeSelector: {}
 
-Persistence:
-  Enabled: false
+persistence:
+  enabled: true
+  annotations: {}
+  accessMode: "ReadWriteOnce"
+  size: "8Gi"
 
-  Annotations: {}
-  AccessMode: ReadWriteOnce
-  Size: 20Gi
-
-NetworkPolicy:
+networkPolicy:
   # Enable creation of NetworkPolicy resources.
-  Enabled: false
+  enabled: false
   # For Kubernetes v1.4, v1.5 and v1.6, use 'extensions/v1beta1'
   # For Kubernetes v1.7, use 'networking.k8s.io/v1'
-  ApiVersion: networking.k8s.io/v1
+  apiVersion: networking.k8s.io/v1
 
 ## Install Default RBAC roles and bindings
 rbac:
-  install: true
-  serviceAccountName: jenkins-master
-  # RBAC api version (currently either v1beta1 or v1alpha1)
-  apiVersion: v1beta1
-  # Cluster role reference
-  roleRef: admin
-  # Role kind (RoleBinding or ClusterRoleBinding)
-  roleBindingKind: ClusterRoleBinding
+  create: true
+  readSecrets: false
