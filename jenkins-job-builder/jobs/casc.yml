@@ -4,7 +4,7 @@
     display-name: "Update Configuration-as-Code configuration"
     scm:
       - git:
-          url: git://github.com/tizianatroukens/jenkins-kubernetes.git
+          url: https://github.com/nehachauhan3378/jenkins-kubernetes.git
           branches:
             - origin/master
     triggers:
@@ -13,6 +13,6 @@
           enable-concurrent: false
     builders:
       - shell: |
-          # crumb=`wget -q --auth-no-challenge --user admin --password admin123 --output-document - 'http://192.168.99.100:32000/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'`
-          crumb=`curl --insecure -s -u admin:admin123 'http://192.168.99.100:32000/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)' 2>&1`
-          curl -X POST "http://192.168.99.100:32000/configuration-as-code/reload" -H $crumb -u admin:admin123
+          # crumb=`wget -q --auth-no-challenge --user admin --password admin123 --output-document - 'http://10.0.212.146:32099/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'`
+          crumb=`curl --insecure -s -u admin:admin123 'http://10.0.212.146:32099/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)' 2>&1`
+          curl -X POST "http://10.0.212.146:32099/configuration-as-code/reload" -H $crumb -u admin:admin123
