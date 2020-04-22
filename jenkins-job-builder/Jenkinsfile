@@ -33,12 +33,12 @@ pipeline {
     }
     stage('Test Jenkins Job Builder Files') {
       steps {
-        sh 'jenkins-jobs test jenkins-job-builder/jobs/'
+        sh '/usr/bin/jenkins-jobs/jenkins-jobs test jenkins-job-builder/jobs/'
       }
     }
     stage('Apply Jenkins Job Builder Files') {
       steps {
-          sh 'jenkins-jobs update jenkins-job-builder/jobs/'
+          sh '/usr/bin/jenkins-jobs/jenkins-jobs update jenkins-job-builder/jobs/'
       }
     }
   }
