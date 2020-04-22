@@ -1,16 +1,15 @@
+---
 - job:
-    name: '1-JJB-SimpleJob-NC'
-    project-type: freestyle
-    disabled: false
-    concurrent: true
+    name: update-casc-config
+    display-name: "Update Configuration-as-Code configuration"
+    scm:
+      - git:
+          url: https://github.com/anilkps199/jenkins-kubernetes.git
+          branches:
+            - origin/master
+    triggers:
+      - pollscm:
+          cron: "* * * * *"
+          enable-concurrent: false
     builders:
       - shell: ls -l
-    quiet-period: 5
-    block-downstream: false
-    block-upstream: false
-    retry-count: 3
-    logrotate:
-      daysToKeep: 3
-      numToKeep: 20
-      artifactDaysToKeep: -1
-      artifactNumToKeep: -1
